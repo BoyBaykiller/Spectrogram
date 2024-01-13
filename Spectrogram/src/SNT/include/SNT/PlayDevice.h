@@ -4,20 +4,20 @@
 
 namespace SNT
 {
-	class PlayDevice
-	{
-	public:
-		explicit PlayDevice() noexcept;
-		~PlayDevice() noexcept;
+    class PlayDevice
+    {
+    public:
+        explicit PlayDevice() noexcept;
+        ~PlayDevice() noexcept;
 
-		SNT_NON_COPYABLE(PlayDevice)
+        SNT_NON_COPYABLE(PlayDevice)
 
-		const ALCdevice* GetHandle() const
-		{
-			return handle_;
-		}
+        const ALCdevice* GetHandle() const
+        {
+            return handle_;
+        }
 
-	private:
-		ALCdevice* handle_ = nullptr;
-	};
+    private:
+        ALCdevice* handle_ = nullptr;
+    };
 }

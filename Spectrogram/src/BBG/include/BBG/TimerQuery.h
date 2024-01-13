@@ -5,17 +5,17 @@
 
 namespace BBG
 {
-	class TimerQuery
-	{
-	public:
-		explicit TimerQuery() noexcept;
-		~TimerQuery() noexcept;
+    class TimerQuery
+    {
+    public:
+        explicit TimerQuery() noexcept;
+        ~TimerQuery() noexcept;
 
-		float GetElapsedTimeInMicroSec() const;
+        float GetElapsedTimeInMicroSec() const;
 
-		BBG_NON_COPYABLE(TimerQuery)
+        BBG_NON_COPYABLE(TimerQuery)
 
-	private:
-		std::array<uint32_t, 2> handles_{};
-	};
+    private:
+        std::array<uint32_t, 2> handles_{};
+    };
 }

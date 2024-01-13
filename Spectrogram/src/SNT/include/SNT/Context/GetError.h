@@ -3,8 +3,8 @@
 
 namespace SNT::Context
 {
-	ErrorCode PopErrorStack()
-	{
-		return (ErrorCode)alGetError();
-	}
+    ErrorCode PopErrorStack()
+    {
+        return (ErrorCode)alGetError();
+    }
 }
