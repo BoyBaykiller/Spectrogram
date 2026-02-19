@@ -15,7 +15,7 @@ namespace Rendering
 	WaveformPlot::WaveformPlot(uint32_t width, uint32_t height, uint32_t downsampleCount) noexcept
 	{
 		gpuUniforms_.orthoProjection = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-		uniformBuffer_ = BBG::TypedBuffer<GpuUniforms>(BBG::BufferStorageFlag::DynamicStorage, gpuUniforms_);
+		uniformBuffer_ = BBG::TypedBuffer<GpuUniforms>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::Synced, gpuUniforms_);
 
 		renderWaveformProgram_ = BBG::ShaderProgram();
 		renderWaveformProgram_.value().Link(
@@ -98,7 +98,7 @@ namespace Rendering
 		BBG::Rendering::DrawNonIndexed(BBG::Topology::LineStrip, 0, waveformTexture_.value().GetCreateInfo().size.x, 1, 0);
 	}
 
-	void WaveformPlot::InlineRenderGui() const
+	void WaveformPlot::RenderGui() const
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 
@@ -116,6 +116,6 @@ namespace Rendering
 	{
 		waveformTexture_ = BBG::Texture2D({ .size = { width, height }, .format = BBG::InternalPixelFormat::R8G8B8A8_Unorm });
 
-		ringBufferAudioSamples_ = BBG::TypedBuffer<AudioSample>(BBG::BufferStorageFlag::DynamicStorage, width);
+		ringBufferAudioSamples_ = BBG::TypedBuffer<AudioSample>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::Synced, width);
 	}
 }

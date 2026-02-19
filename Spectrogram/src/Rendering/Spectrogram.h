@@ -23,7 +23,7 @@ namespace Rendering
 
 		void AddSamples(std::span<const ComplexType> newSamples);
 		void RenderSpectrogram() const;
-		void InlineRenderGui() const;
+		void RenderGui() const;
 		void SetResolution(uint32_t timeAxisSizeX, uint32_t frequencyAxisSizeY);
 		void SetResolution(uint32_t timeAxisSizeX, uint32_t frequencyAxisSizeY, uint32_t shortTimeFFTSize);
 

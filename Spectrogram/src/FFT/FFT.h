@@ -1,7 +1,7 @@
 #pragma once
 
-#include <optional>
 #include <complex>
+#include <optional>
 
 #include <BBG/BBG.h>
 #include <BBG/Buffer.h>
@@ -17,7 +17,7 @@ namespace Rendering
     public:
         explicit FFT() noexcept;
 
-        void ComputeFFT(const BBG::TypedBuffer<ComplexType>& complexInput, uint64_t inputElementsOffset, const BBG::TypedBuffer<ComplexType>& complexOutput, uint64_t outputElementsOffset, uint32_t fftSize) const;
+        void FFT1D(const BBG::TypedBuffer<ComplexType>& inputBuffer, uint64_t inputElementsOffset, const BBG::TypedBuffer<ComplexType>& outputBuffer, uint64_t outputElementsOffset, uint32_t fftSize) const;
 
     private:
         struct GpuUniforms

@@ -32,11 +32,11 @@ void main()
 
     // A convolution tells us how much of a given signal is contained in an other.
     // A DFT peforms two convolutions [ sin(testedFreq) & cos(testedFreq) ] over the entire input signal just to get a single output. This makes it O(n^2).
-    // Luckily there is a pattern when evaluating the two sinusoids. The two sinusoids evaluted are may be called rootOfUnity.
+    // Luckily there is a pattern when evaluating the two sinusoids. The two sinusoids evaluted are be called rootOfUnity.
     //
     // See https://www.desmos.com/calculator/d4gnmx1zhc?lang=de.
-	// For every sinusoid-function k pick the other sinusoid-function (k + size / 2)
-	// The even index samples (2, 4, 6...) share the same value and the odd index samples are simply negated.
+    // For every sinusoid-function k pick the other sinusoid-function (k + size / 2)
+    // The even index samples (2, 4, 6...) share the same value and the odd index samples are simply negated.
     // This is what the FFT exploits and what makes it O(nlog(n))
 
     // Reorder so we have pairs with the same rootOfUnity. See https://www.dspguide.com/ch12/2.htm

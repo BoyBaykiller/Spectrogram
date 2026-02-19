@@ -22,11 +22,11 @@ namespace BBG
             UploadPixelFormat format = {};
             UploadPixelType type = {};
             glm::uvec2 size = WHOLE_TEXTURE;
-            uint32_t xOffset = 0;
-            uint32_t yOffset = 0;
+            glm::uvec2 offset = {};
             uint32_t level = 0;
         };
 
+        using DownloadInfo = UploadInfo;
         using ClearInfo = UploadInfo;
 
     public:
@@ -36,7 +36,6 @@ namespace BBG
         Texture2D& operator=(Texture2D&& old) noexcept;
         BBG_NON_COPYABLE(Texture2D);
 
-        void SetSwizzle(GLint swizzleR, GLint swizzleG, GLint swizzleB, GLint swizzleA) const;
         void UploadPixels(const UploadInfo& info, const void* data) const;
         void ClearPixels(const ClearInfo& info, const void* data) const;
         

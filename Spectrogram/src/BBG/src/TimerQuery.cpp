@@ -21,7 +21,6 @@ namespace BBG
         glGetQueryObjectui64v(handles_[0], GL_QUERY_RESULT, &startTime);
         glGetQueryObjectui64v(handles_[1], GL_QUERY_RESULT, &endTime);
 
-
         return (endTime - startTime) / 1000.0f;
     }
 }

@@ -21,7 +21,7 @@ namespace BBG
         };
 
     public:
-        explicit Buffer(BufferStorageFlag flags, size_t size, const void* data = nullptr) noexcept;
+        explicit Buffer(MemLocation memLocation, MemAccess memAccess, size_t size, const void* data = nullptr) noexcept;
         ~Buffer() noexcept;
         Buffer(Buffer&& old) noexcept;
         Buffer& operator=(Buffer&& old) noexcept;
@@ -32,14 +32,14 @@ namespace BBG
         void SimpleClear(const void* data) const;
         void Clear(ClearInfo clearInfo, const void* data) const;
 
-        void* GetMappedMemory() const
+        MemLocation GetMemLocation() const
         {
-            return mappedMemory_;
+            return memLocation_;
         }
 
-        BufferStorageFlag GetBufferStorageFlags() const
+        MemAccess GetMemAccess() const
         {
-            return bufferStorageFlags_;
+            return memAccess_;
         }
 
         size_t GetSize() const
@@ -56,26 +56,26 @@ namespace BBG
     private:
         uint32_t handle_ = 0;
         size_t bufferSize_;
-        BufferStorageFlag bufferStorageFlags_;
-        void* mappedMemory_;
+        MemLocation memLocation_;
+        MemAccess memAccess_;
     };
 
     template<typename T>
     class TypedBuffer : public Buffer
     {
     public:
-        explicit TypedBuffer(BufferStorageFlag flags, const T& data) noexcept
-            : TypedBuffer(flags, 1, &data)
+        explicit TypedBuffer(MemLocation memLocation, MemAccess memAccess, const T& data) noexcept
+            : TypedBuffer(memLocation, memAccess, 1, &data)
         {
         }
 
-        explicit TypedBuffer(BufferStorageFlag flags, std::span<const T> data) noexcept
-            : TypedBuffer(flags, data.size(), data.data())
+        explicit TypedBuffer(MemLocation memLocation, MemAccess memAccess, std::span<const T> data) noexcept
+            : TypedBuffer(memLocation, memAccess, data.size(), data.data())
         {
         }
 
-        explicit TypedBuffer(BufferStorageFlag flags, size_t count, const T* data = nullptr) noexcept
-            : Buffer(flags, sizeof(T) * count, data)
+        explicit TypedBuffer(MemLocation memLocation, MemAccess memAccess, size_t count, const T* data = nullptr) noexcept
+            : Buffer(memLocation, memAccess, sizeof(T) * count, data)
         {
         }
 
@@ -84,7 +84,7 @@ namespace BBG
             UploadElements(startIndex, 1, &element);
         }
 
-        void UploadElements(size_t startIndex, std::span<const T> data) const
+        void UploadElements(std::span<const T> data, size_t startIndex = 0) const
         {
             UploadElements(startIndex, data.size(), data.data());
         }
@@ -94,7 +94,7 @@ namespace BBG
             Buffer::UploadData(sizeof(T) * startIndex, sizeof(T) * count, data);
         }
 
-        void DownloadElements(size_t startIndex, std::span<T> data) const
+        void DownloadElements(std::span<T> data, size_t startIndex = 0) const
         {
             DownloadElements(startIndex, data.size(), data.data());
         }
@@ -103,7 +103,6 @@ namespace BBG
         {
             Buffer::DownloadData(sizeof(T) * startIndex, sizeof(T) * count, data);
         }
-
 
         size_t GetNumElements() const
         {

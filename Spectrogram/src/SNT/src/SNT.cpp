@@ -1,5 +1,4 @@
 #include <SNT/SNT.h>
-#include <SNT/PlayDevice.h>
 
 namespace SNT
 {

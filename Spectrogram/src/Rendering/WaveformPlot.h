@@ -19,7 +19,7 @@ namespace Rendering
 
 		void AddSamples(std::span<const AudioSample> newSamples);
 		void RenderWaveform() const;
-		void InlineRenderGui() const;
+		void RenderGui() const;
 		void SetResolution(uint32_t width, uint32_t height);
 
 		uint32_t GetTimeAxisSize() const

@@ -18,7 +18,7 @@ namespace Rendering
 {
     Spectrogram::Spectrogram(uint32_t timeAxisSizeX, uint32_t frequencyAxisSizeY, uint32_t shortTimeFFTSize) noexcept
     {
-        uniformBuffer_ = BBG::TypedBuffer<GpuUniforms>(BBG::BufferStorageFlag::DynamicStorage, 1);
+        uniformBuffer_ = BBG::TypedBuffer<GpuUniforms>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::Synced, 1);
         renderSpectrogramProgram_ = BBG::ShaderProgram();
         renderSpectrogramProgram_.value().Link(
             BBG::TypedShader<BBG::ShaderType::Compute>(LoadFileWithIncludes("res/shaders/Spectrogram/compute.glsl"))
@@ -39,11 +39,11 @@ namespace Rendering
             return;
         }
 
-        auto inputData = BBG::TypedBuffer<FFT::ComplexType>(BBG::BufferStorageFlag::None, gpuUniforms_.shortTimeFFTSize, bufferedSamples_.data());
-        const auto& outputData = spectrogramBuffer_.value();
-        fft_.value().ComputeFFT(
-            inputData, 0,
-            outputData, gpuUniforms_.spectrogramHeadXAxis * gpuUniforms_.shortTimeFFTSize,
+        auto inputBuffer = BBG::TypedBuffer<FFT::ComplexType>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::None, gpuUniforms_.shortTimeFFTSize, bufferedSamples_.data());
+        const auto& outputBuffer = spectrogramBuffer_.value();
+        fft_.value().FFT1D(
+            inputBuffer, 0,
+            outputBuffer, gpuUniforms_.spectrogramHeadXAxis * gpuUniforms_.shortTimeFFTSize,
             gpuUniforms_.shortTimeFFTSize
         );
         BBG::Rendering::MemoryBarrier(BBG::MemoryBarrierFlags::ShaderStorage);
@@ -63,9 +63,8 @@ namespace Rendering
         BBG::Rendering::DispatchThreads({ spectrogramTexture_.value().GetCreateInfo().size, 1 }, { 8, 8, 1 });
     }
 
-    void Spectrogram::InlineRenderGui() const
+    void Spectrogram::RenderGui() const
     {
-        // Spectrogram Output
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
         static bool isOpenWaveform = true;
         ImGui::Begin("Spectrogram", &isOpenWaveform, ImGuiWindowFlags_NoDecoration);
@@ -76,7 +75,6 @@ namespace Rendering
         ImGui::End();
         ImGui::PopStyleVar();
 
-        // Spectrogram Settings
         if (ImGui::Begin("Spectrogram Settings"))
         {
             ImGui::SliderFloat("Input Scale", (float*)&gpuUniforms_.inputScale, 0.2f, 1.0);
@@ -93,12 +91,10 @@ namespace Rendering
     {
         gpuUniforms_.shortTimeFFTSize = shortTimeFFTSize;
         spectrogram_ = std::vector<ComplexType>(timeAxisSizeX * shortTimeFFTSize);
-        spectrogramBuffer_ = BBG::TypedBuffer<ComplexType>(BBG::BufferStorageFlag::DynamicStorage, spectrogram_.size());
+        spectrogramBuffer_ = BBG::TypedBuffer<ComplexType>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::Synced, spectrogram_.size());
 
         spectrogramTexture_ = BBG::Texture2D({ .size = { timeAxisSizeX, frequencyAxisSizeY }, .format = BBG::InternalPixelFormat::R8G8B8A8_Unorm });
-        
 
-        // Zero ressources
         const float clearValue = 0.0f;
         spectrogramBuffer_.value().SimpleClear(&clearValue);
         spectrogramTexture_.value().ClearPixels(

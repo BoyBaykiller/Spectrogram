@@ -5,7 +5,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 
 #include <imgui.h>
@@ -13,7 +12,6 @@
 #include <imgui_impl_opengl3.h>
 
 #include <SNT/CaptureDevice.h>
-#include <SNT/PlayDevice.h>
 
 #include <BBG/BBG.h>
 #include <BBG/Buffer.h>
@@ -29,68 +27,28 @@
 #include "Rendering/WaveformPlot.h"
 #include "Rendering/Spectrogram.h"
 
-
-static constexpr uint32_t SHORT_TIME_FFT_SIZE = 4096; // Rayleigh Frequency: (1 / SHORT_TIME_FFT_SIZE) * CaptureFrequency
+// Spectrogam Settings
+static uint32_t ShortTimeFFTSize = 4096; // Rayleigh Frequency: (1 / ShortTimeFFTSize) * CaptureFrequency
 static uint32_t CaptureFrequency = 88200; // Nyquist Frequency: CaptureFrequency / 2
 static uint32_t TimeHistoryLengthInSec = 10;
 static uint32_t MaxFrequency = 4000; // Frequencies >= CaptureFrequency will result in blank areas on the spectrogramPlot as they can not be captured
 
-static constexpr auto AudioFormat = SNT::AudioFormat::MonoFloat32;
-using AudioSample = SNT::AudioSample<AudioFormat>;
+// Renderdata
+static std::optional<Rendering::WaveformPlot> waveformPlot;
+static std::optional<Rendering::Spectrogram> spectrogramPlot;
 
-static glm::uvec2 CalcSpectrogramSize(uint32_t historyLength, uint32_t maxFrequency, uint32_t captureFrequency, uint32_t fftSize)
-{
-    uint32_t spectrogramTimeAxisSize = std::ceilf(historyLength / ((float)fftSize / captureFrequency));
-    uint32_t spectrogramFrequencyAxisSize = std::ceilf(maxFrequency / (float)captureFrequency * fftSize);
-
-    return glm::uvec2(spectrogramTimeAxisSize, spectrogramFrequencyAxisSize);
-}
-
+// Window Settings
 static uint32_t renderWidth = 1600;
 static uint32_t renderHeight = 900;
 static bool windowFocused = true;
-static std::optional<Rendering::WaveformPlot> waveformPlot;
-static std::optional<Rendering::Spectrogram> spectrogramPlot;
-static void ResizeRessources(uint32_t width, uint32_t height)
-{
-    if (!windowFocused)
-    {
-        return;
-    }
-    if (width == 0 || height == 0)
-    {
-        return;
-    }
 
-    renderWidth = width;
-    renderHeight = height;
+// Other
+static constexpr auto AudioFormat = SNT::AudioFormat::MonoFloat32;
+using AudioSample = SNT::AudioSample<AudioFormat>;
 
-    if (!waveformPlot.has_value())
-    {
-        waveformPlot = Rendering::WaveformPlot(renderWidth / 2, renderHeight, 31);
-    }
-    else
-    {
-        waveformPlot.value().SetResolution(renderWidth / 2, renderHeight);
-    }
-
-    auto size = CalcSpectrogramSize(TimeHistoryLengthInSec, MaxFrequency, CaptureFrequency, SHORT_TIME_FFT_SIZE);
-    if (!spectrogramPlot.has_value())
-    {
-        spectrogramPlot = Rendering::Spectrogram(size.x, size.y, SHORT_TIME_FFT_SIZE);
-    }
-    else
-    {
-        spectrogramPlot.value().SetResolution(size.x, size.y);
-    }
-}
-
-static void GLAPIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
-    if (id == 131185) return; // NVIDIA, Buffer detailed info
-
-    Logger::Log(message);
-}
+static glm::uvec2 CalcSpectrogramSize(uint32_t historyLength, uint32_t maxFrequency, uint32_t captureFrequency, uint32_t fftSize);
+static void ResizeRessources(uint32_t width, uint32_t height);
+static void GLAPIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 int main()
 {
@@ -113,7 +71,7 @@ int main()
             std::cin.get();
             return 0;
         }
-
+        
         glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height)
             {
                 renderWidth = width;
@@ -127,7 +85,7 @@ int main()
                 windowFocused = focused;
             }
         );
-
+        
         glfwMakeContextCurrent(window);
         gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         glfwSwapInterval(1);
@@ -144,7 +102,6 @@ int main()
         }
     }
 
-    // TODO: This should be part of BBG
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(GLDebugCallback, 0);
@@ -191,8 +148,8 @@ int main()
                 ImGui::NewFrame();
                 ImGui::DockSpaceOverViewport();
 
-                waveformPlot.value().InlineRenderGui();
-                spectrogramPlot.value().InlineRenderGui();
+                waveformPlot.value().RenderGui();
+                spectrogramPlot.value().RenderGui();
 
                 if (ImGui::Begin("Settings"))
                 {
@@ -200,12 +157,12 @@ int main()
                     if (ImGui::BeginCombo("###0", captureDevice.GetName()))
                     {
                         static auto captureDeviceNames = SNT::GetAllCaptureDeviceNames();
-                        for (const auto& it : captureDeviceNames)
+                        for (const auto& el : captureDeviceNames)
                         {
-                            bool isSelected = captureDevice.GetName() == it.c_str();
-                            if (ImGui::Selectable(it.c_str(), isSelected))
+                            bool isSelected = captureDevice.GetName() == el.c_str();
+                            if (ImGui::Selectable(el.c_str(), isSelected))
                             {
-                                captureDevice = SNT::TypedCaptureDevice<AudioFormat>(it, CaptureFrequency);
+                                captureDevice = SNT::TypedCaptureDevice<AudioFormat>(el, CaptureFrequency);
                                 captureDevice.StartCapture();
                             }
 
@@ -217,35 +174,25 @@ int main()
                         ImGui::EndCombo();
                     }
                     ImGui::PopItemWidth();
-
                 
                     uint32_t nyquistFreq = CaptureFrequency / 2;
                     ImGui::SliderInt("History in Sec", (int*)&TimeHistoryLengthInSec, 1, 20);
+                    ImGui::SliderInt("FFT Size", (int*)&ShortTimeFFTSize, 4, 16384);
                     ImGui::SliderInt("Max Frequency", (int*)&MaxFrequency, 1, nyquistFreq);
-
-                    ImGui::BeginDisabled();
-                    // TODO: Implement
-                    ImGui::SliderInt("FFT Size", (int*)&SHORT_TIME_FFT_SIZE, 4, 16384);
-
-                    ImGui::EndDisabled();
-
-                    auto curSize = spectrogramPlot.value().GetSpectrogramTexture().GetCreateInfo().size;
-                    auto size = CalcSpectrogramSize(TimeHistoryLengthInSec, MaxFrequency, CaptureFrequency, SHORT_TIME_FFT_SIZE);
-                    if (size.x != curSize.x || size.y != curSize.y)
-                    {
-                        spectrogramPlot.value().SetResolution(size.x, size.y, SHORT_TIME_FFT_SIZE);
-                    }
-
                     if (ImGui::InputInt("Frequency", (int*)&CaptureFrequency, 1000))
                     {
                         captureDevice = SNT::TypedCaptureDevice<AudioFormat>(captureDevice.GetName(), CaptureFrequency);
                         captureDevice.StartCapture();
                     }
 
+                    auto curSize = spectrogramPlot.value().GetSpectrogramTexture().GetCreateInfo().size;
+                    auto size = CalcSpectrogramSize(TimeHistoryLengthInSec, MaxFrequency, CaptureFrequency, ShortTimeFFTSize);
+                    if (size != curSize)
+                    {
+                        spectrogramPlot.value().SetResolution(size.x, size.y, ShortTimeFFTSize);
+                    }
                 }
                 ImGui::End();
-
-                //ImGui::ShowDemoWindow();
 
                 ImGui::Render();
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -255,5 +202,53 @@ int main()
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
-    captureDevice.EndCapture();
+}
+
+static glm::uvec2 CalcSpectrogramSize(uint32_t historyLength, uint32_t maxFrequency, uint32_t captureFrequency, uint32_t fftSize)
+{
+    uint32_t spectrogramTimeAxisSize = std::ceilf(historyLength / ((float)fftSize / captureFrequency));
+    uint32_t spectrogramFrequencyAxisSize = std::ceilf(maxFrequency / (float)captureFrequency * fftSize);
+
+    return glm::uvec2(spectrogramTimeAxisSize, spectrogramFrequencyAxisSize);
+}
+
+static void ResizeRessources(uint32_t width, uint32_t height)
+{
+    if (!windowFocused)
+    {
+        return;
+    }
+    if (width == 0 || height == 0)
+    {
+        return;
+    }
+
+    renderWidth = width;
+    renderHeight = height;
+
+    if (!waveformPlot.has_value())
+    {
+        waveformPlot = Rendering::WaveformPlot(renderWidth / 2, renderHeight, 31);
+    }
+    else
+    {
+        waveformPlot.value().SetResolution(renderWidth / 2, renderHeight);
+    }
+
+    auto size = CalcSpectrogramSize(TimeHistoryLengthInSec, MaxFrequency, CaptureFrequency, ShortTimeFFTSize);
+    if (!spectrogramPlot.has_value())
+    {
+        spectrogramPlot = Rendering::Spectrogram(size.x, size.y, ShortTimeFFTSize);
+    }
+    else
+    {
+        spectrogramPlot.value().SetResolution(size.x, size.y);
+    }
+}
+
+static void GLAPIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    if (id == 131185) return; // NVIDIA, Buffer detailed info
+
+    Logger::Log(message);
 }

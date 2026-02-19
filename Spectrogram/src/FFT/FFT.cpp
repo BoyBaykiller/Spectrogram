@@ -10,7 +10,7 @@ namespace Rendering
 {
     FFT::FFT() noexcept
     {
-        uniformBuffer = BBG::TypedBuffer<GpuUniforms>(BBG::BufferStorageFlag::DynamicStorage, 1);
+        uniformBuffer = BBG::TypedBuffer<GpuUniforms>(BBG::MemLocation::DeviceLocal, BBG::MemAccess::Synced, 1);
 
         reorderStageProgram = BBG::ShaderProgram();
         reorderStageProgram.value().Link(
@@ -23,14 +23,14 @@ namespace Rendering
         );
     }
 
-    void FFT::ComputeFFT(const BBG::TypedBuffer<ComplexType>& complexInput, uint64_t inputElementsOffset, const BBG::TypedBuffer<ComplexType>& complexOutput, uint64_t outputElementsOffset, uint32_t fftSize) const
+    void FFT::FFT1D(const BBG::TypedBuffer<ComplexType>& inputBuffer, uint64_t inputElementsOffset, const BBG::TypedBuffer<ComplexType>& outputBuffer, uint64_t outputElementsOffset, uint32_t fftSize) const
     {
         bool isPowerOfTwo = (fftSize != 0) && ((fftSize & (fftSize - 1)) == 0);
         assert(isPowerOfTwo && "FFT size must be a power of 2");
 
         BBG::Rendering::SetUniformBlock(uniformBuffer.value(), 0);
-        BBG::Rendering::SetShaderStorageBlock(complexInput, 0, inputElementsOffset * sizeof(FFT::ComplexType), fftSize * sizeof(FFT::ComplexType));
-        BBG::Rendering::SetShaderStorageBlock(complexOutput, 1, outputElementsOffset * sizeof(FFT::ComplexType), fftSize * sizeof(FFT::ComplexType));
+        BBG::Rendering::SetShaderStorageBlock(inputBuffer, 0, inputElementsOffset * sizeof(ComplexType), fftSize * sizeof(ComplexType));
+        BBG::Rendering::SetShaderStorageBlock(outputBuffer, 1, outputElementsOffset * sizeof(ComplexType), fftSize * sizeof(ComplexType));
 
         GpuUniforms uniforms = {
             .log2FftSize = (uint32_t)std::log2(fftSize),
@@ -53,7 +53,7 @@ namespace Rendering
             uniformBuffer.value().UploadElements(uniforms);
 
             BBG::Rendering::MemoryBarrier(BBG::MemoryBarrierFlags::ShaderStorage);
-            BBG::Rendering::DispatchThreads({ (fftSize / 2) , 1, 1 }, { 64, 1, 1 });
+            BBG::Rendering::DispatchThreads({ (fftSize / 2), 1, 1 }, { 64, 1, 1 });
         }
     }
 }

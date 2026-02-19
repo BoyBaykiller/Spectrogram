@@ -33,11 +33,9 @@
     <ClCompile Include="src\Rendering\Spectrogram.cpp" />
     <ClCompile Include="src\Rendering\WaveformPlot.cpp" />
     <ClCompile Include="src\SNT\src\CaptureDevice.cpp" />
-    <ClCompile Include="src\SNT\src\Context\Buffer.cpp" />
-    <ClCompile Include="src\SNT\src\Context\Source.cpp" />
-    <ClCompile Include="src\SNT\src\PlayDevice.cpp" />
     <ClCompile Include="src\SNT\src\SNT.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="thirdparty\glad\glad.c" />
     <ClCompile Include="thirdparty\imgui\imgui\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\imgui\imgui_demo.cpp" />
     <ClCompile Include="thirdparty\imgui\imgui\imgui_draw.cpp" />
@@ -315,10 +313,6 @@
     <ClInclude Include="src\SNT\include\AL\efx-presets.h" />
     <ClInclude Include="src\SNT\include\AL\efx.h" />
     <ClInclude Include="src\SNT\include\SNT\CaptureDevice.h" />
-    <ClInclude Include="src\SNT\include\SNT\Context\Buffer.h" />
-    <ClInclude Include="src\SNT\include\SNT\Context\GetError.h" />
-    <ClInclude Include="src\SNT\include\SNT\Context\Source.h" />
-    <ClInclude Include="src\SNT\include\SNT\PlayDevice.h" />
     <ClInclude Include="src\SNT\include\SNT\private\NonCopyable.h" />
     <ClInclude Include="src\SNT\include\SNT\SNT.h" />
     <ClInclude Include="src\Timer.h" />
@@ -484,26 +478,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -548,12 +542,12 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\glad\win-x64-glad.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -565,14 +559,14 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\glad\win-x64-glad.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -582,12 +576,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\glad\win-x64-glad.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -599,14 +593,14 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\BBG\include;$(ProjectDir)src\SNT\include;$(ProjectDir)thirdparty\GLFW\include;$(ProjectDir)thirdparty\imgui\imgui;$(ProjectDir)\thirdparty\glad\include;$(ProjectDir)\thirdparty\glm;$(ProjectDir)\thirdparty\stbi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\glad\win-x64-glad.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
+      <AdditionalDependencies>gdi32.lib;user32.lib;shell32.lib;ole32.lib;winmm.lib;$(ProjectDir)thirdparty\GLFW\lib-vc2019\glfw3.lib;$(ProjectDir)\thirdparty\openal\OpenAL32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

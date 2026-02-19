@@ -2,32 +2,22 @@
 
 namespace BBG
 {
-    Buffer::Buffer(BufferStorageFlag flags, size_t size, const void* data) noexcept
-        : bufferSize_(size), bufferStorageFlags_(flags)
+    Buffer::Buffer(MemLocation memLocation, MemAccess memAccess, size_t size, const void* data) noexcept
+        : memLocation_(memLocation), memAccess_(memAccess), bufferSize_(size)
     {
         glCreateBuffers(1, &handle_);
-        glNamedBufferStorage(handle_, size, data, (GLbitfield)flags);
-        
-        mappedMemory_ = nullptr;
-        if (flags == BufferStorageFlag::MappedStorage)
-        {
-            mappedMemory_ = glMapNamedBufferRange(handle_, 0, size, (GLbitfield)flags);
-        }
+        glNamedBufferStorage(handle_, size, data, (GLbitfield)memLocation | (GLbitfield)memAccess);
     }
     Buffer::~Buffer() noexcept
     {
-        if (mappedMemory_ != nullptr)
-        {
-            glUnmapNamedBuffer(handle_);
-        }
         glDeleteBuffers(1, &handle_);
     }
 
     Buffer::Buffer(Buffer&& old) noexcept
         : handle_(std::exchange(old.handle_, 0)),
         bufferSize_(std::exchange(old.bufferSize_, 0)),
-        bufferStorageFlags_(std::exchange(old.bufferStorageFlags_, BufferStorageFlag::None)),
-        mappedMemory_(std::exchange(old.mappedMemory_, nullptr))
+        memLocation_(std::exchange(old.memLocation_, (BBG::MemLocation)0)),
+        memAccess_(std::exchange(old.memAccess_, (BBG::MemAccess)0))
     {
     }
 

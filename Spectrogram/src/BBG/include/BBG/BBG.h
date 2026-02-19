@@ -24,36 +24,27 @@ namespace BBG
     enum class UploadPixelType
     {
         Float = GL_FLOAT,
-        UnsignedByte = GL_UNSIGNED_BYTE,
     };
 
     enum class UploadPixelFormat
     {
         R = GL_RED,
         Rgba = GL_RGBA,
-        Rgb = GL_RGB,
     };
 
     enum class InternalPixelFormat
     {
         R32_Float = GL_R32F,
-        R8G8B8_Unorm = GL_RGB8,
         R8G8B8A8_Unorm = GL_RGBA8,
-        R16G16B16A16_Float = GL_RGBA16F,
-        R32G32B32A32_Float = GL_RGBA32F,
     };
 
     enum class ImageFormat
     {
         R8G8B8A8_Unorm = (int)InternalPixelFormat::R8G8B8A8_Unorm,
-        R16G16B16A16_Float = (int)InternalPixelFormat::R16G16B16A16_Float,
-        R32G32B32A32_Float = (int)InternalPixelFormat::R32G32B32A32_Float,
     };
 
     enum class Topology
     {
-        Points = GL_POINTS,
-        Lines = GL_LINES,
         LineStrip = GL_LINE_STRIP,
         Triangles = GL_TRIANGLES,
     };
@@ -65,24 +56,28 @@ namespace BBG
         Compute = GL_COMPUTE_SHADER,
     };
 
-    enum class BufferStorageFlag
+    enum class MemLocation
     {
-        // The buffer can only be filled once at the time of buffer creation
-        None = GL_NONE,
-        
-        // The buffer may be updated or downloaded with Buffer::UploadData or Buffer::DownloadData.
-        // Synchronization is taken care of by OpenGL.
-        DynamicStorage = GL_DYNAMIC_STORAGE_BIT,
+        // The buffer resides in DEVICE memory
+        DeviceLocal = 0,
 
-        // The buffer can be read & write by using the mapped memory pointer. Buffer::UploadData no longer works.
-        // Writes by the DEVICE only become visible to the HOST after a call to glFenceSync(SYNC_GPU_COMMANDS_COMPLETE, 0).
-        MappedStorage = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT,
+        // The buffer resides in HOST memory
+        HostLocal = GL_CLIENT_STORAGE_BIT,
+    };
 
-        // The buffer can be read & write by using the mapped memory pointer. Buffer::UploadData no longer works.
-        // Writes by the HOST only become visible to the DEVICE after a call to glFlushMappedBufferRange.
-        // Writes by the DEVICE only become visible to the HOST after a call to glMemoryBarrier(CLIENT_MAPPED_BUFFER_BARRIER_BIT)
-        // followed by glFenceSync(SYNC_GPU_COMMANDS_COMPLETE, 0)
-        MappedStorageNoSync = GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT
+    enum class MemAccess
+    {
+        /// <summary>
+        /// The buffer can not be written to from the HOST except at the time of creation.
+        /// It can be read by using the Download functions.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The buffer must be written or read by to using the Upload/Download functions.
+        /// Synchronization is taken care of by OpenGL.
+        /// </summary>
+        Synced = GL_DYNAMIC_STORAGE_BIT,
     };
 
     enum class MemoryBarrierFlags
